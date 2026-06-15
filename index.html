@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A customizable birthday card with click-through chaos, silly interactions, and a gift reveal.">
+  <title>Birthday Card</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <audio id="songPlayer" src="song.mp3" preload="auto"></audio>
+
+  <div class="app-shell">
+    <header class="config-header" id="configHeader">
+      <p class="mode-pill" id="modePill">Config mode</p>
+      <p class="mode-copy" id="modeCopy">No data param found. Build a share link, then send the finished card.</p>
+    </header>
+
+    <div class="app-layout">
+      <aside class="builder-panel" id="builderSection" hidden>
+        <div class="builder-header">
+          <h2>Build the share link</h2>
+          <p>Edit the fields, copy the link, and the card preview updates live.</p>
+        </div>
+
+        <form class="builder-form" id="builderForm">
+          <label class="field">
+            <span>To</span>
+            <input type="text" name="to" maxlength="80">
+          </label>
+
+          <label class="field">
+            <span>From</span>
+            <input type="text" name="from" maxlength="80">
+          </label>
+
+          <label class="field field-wide">
+            <span>Main message</span>
+            <textarea name="message" rows="4" maxlength="320"></textarea>
+          </label>
+
+          <label class="field">
+            <span>Gift code</span>
+            <input type="text" name="redeemCode" maxlength="120">
+          </label>
+
+          <label class="field">
+            <span>Phone number</span>
+            <input type="text" name="redeemPhone" maxlength="32">
+          </label>
+
+          <label class="field field-wide">
+            <span>Text message</span>
+            <input type="text" name="redeemSmsText" maxlength="160">
+          </label>
+
+          <label class="field">
+            <span>Text button label</span>
+            <input type="text" name="redeemCtaLabel" maxlength="48">
+          </label>
+
+          <label class="field">
+            <span>Accent</span>
+            <select name="accent">
+              <option value="bubblegum">Bubblegum</option>
+              <option value="gold">Gold</option>
+              <option value="mint">Mint</option>
+              <option value="cherry">Cherry</option>
+            </select>
+          </label>
+
+          <div class="builder-actions">
+            <button class="primary-button" id="copyLinkButton" type="button">Copy share link</button>
+          </div>
+
+          <label class="field field-wide">
+            <span>Generated link</span>
+            <textarea id="generatedLinkOutput" rows="4" readonly></textarea>
+          </label>
+
+          <p class="builder-status" id="builderStatus">The copied link includes the full `data` payload.</p>
+        </form>
+      </aside>
+
+      <main class="preview-column">
+        <div class="party-layer" id="partyLayer" aria-hidden="true"></div>
+
+        <article class="birthday-card" id="birthdayCard" data-party-level="0">
+          <div class="card-paper">
+            <section class="card-cover" id="cardCover">
+              <div class="cover-badge">birthday delivery</div>
+              <p class="cover-for">For <span id="coverToName">Birthday Legend</span></p>
+              <button class="primary-button open-button is-attention" id="openCardButton" type="button">Open the card</button>
+            </section>
+
+            <section class="card-inside" id="cardInside" hidden>
+              <div class="inside-top">
+                <p class="note-chip">Birthday mission for <span id="recipientName">Birthday Legend</span></p>
+                <h2 class="inside-headline" id="insideHeadline">It's your birthday today!</h2>
+                <p class="inside-message" id="insideMessage">I hid your gift behind a tiny sequence of nonsense because handing it over normally felt boring.</p>
+                <p class="inside-signoff">From <span id="senderName">Someone who planned ahead</span></p>
+              </div>
+
+              <section class="scene-stage" aria-hidden="true">
+                <div class="stage-lights"></div>
+                <div class="balloon-row">
+                  <span class="balloon balloon-one"></span>
+                  <span class="balloon balloon-two"></span>
+                  <span class="balloon balloon-three"></span>
+                </div>
+
+                <div class="prop-stage">
+                  <div class="cake-art">
+                    <span class="cake-plate"></span>
+                    <span class="cake-body"></span>
+                    <span class="cake-body cake-body-back"></span>
+                    <span class="cake-icing"></span>
+                    <span class="cake-slice"></span>
+                    <div class="candle-row">
+                      <span class="candle"><span class="wick"></span><span class="flame"></span></span>
+                      <span class="candle candle-tall"><span class="wick"></span><span class="flame"></span></span>
+                      <span class="candle"><span class="wick"></span><span class="flame"></span></span>
+                    </div>
+                  </div>
+
+                  <div class="gift-art">
+                    <span class="gift-box"></span>
+                    <span class="gift-lid"></span>
+                    <span class="gift-ribbon-v"></span>
+                    <span class="gift-ribbon-h"></span>
+                  </div>
+                </div>
+
+              </section>
+
+              <section class="lyric-panel">
+                <div class="lyric-progress" id="progressDots" aria-label="Card progress"></div>
+                <p class="lyric-line" id="lyricLine">Open the card to start the birthday nonsense.</p>
+                <p class="lyric-hint" id="lyricHint">The card gets louder as you keep tapping.</p>
+
+                <div class="action-stack">
+                  <button class="primary-button" id="nextButton" type="button" disabled>Keep going</button>
+                </div>
+              </section>
+
+              <section class="loot-panel" id="lootPanel" hidden>
+                <p class="loot-kicker">Birthday loot</p>
+                <h3 id="lootTitle">Your gift is ready</h3>
+                <p class="loot-intro" id="lootIntro">You made it to the good part.</p>
+
+                <div class="loot-actions" id="lootActions">
+                  <div class="code-card" id="codeCard" hidden>
+                    <span class="mini-label">Gift code</span>
+                    <code id="lootCode">AMZN-DEMO-CODE</code>
+                    <button class="secondary-button" id="copyCodeButton" type="button">Copy code</button>
+                  </div>
+
+                  <a class="loot-link" id="smsLink" href="#" hidden>Text for the gift</a>
+                </div>
+              </section>
+
+              <div class="sticker-strip" aria-hidden="true">
+                <img class="sticker sticker-phase-one" src="assets/stickers/sticker-excited-happy.gif" alt="" loading="lazy">
+                <img class="sticker sticker-phase-one" src="assets/stickers/sticker-frog-bike.gif" alt="" loading="lazy">
+                <img class="sticker sticker-phase-two" src="assets/stickers/sticker-spongebob-dance.gif" alt="" loading="lazy">
+                <img class="sticker sticker-phase-two" src="assets/stickers/sticker-birthday-dance-1.gif" alt="" loading="lazy">
+                <img class="sticker sticker-phase-two" src="assets/stickers/sticker-birthday-dance-2.gif" alt="" loading="lazy">
+                <img class="sticker sticker-phase-three" src="assets/stickers/sticker-banana-dance.gif" alt="" loading="lazy">
+                <img class="sticker sticker-phase-three" src="assets/stickers/sticker-rainbow-frog.gif" alt="" loading="lazy">
+              </div>
+            </section>
+          </div>
+        </article>
+      </main>
+    </div>
+
+    <p class="sr-only" id="liveStatus" aria-live="polite"></p>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
